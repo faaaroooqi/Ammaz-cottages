@@ -1,0 +1,100 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Dark-mode scrollbar ──────────────────────────────────────────── */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+.dark ::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #6366f1, #3b82f6);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4f46e5, #2563eb);
+}
+
+/* ── Dark body/html defaults ─────────────────────────────────────── */
+body {
+  @apply bg-gray-50 text-gray-900 transition-colors duration-300;
+}
+
+.dark body {
+  @apply bg-gray-950 text-gray-100;
+}
+
+.dark {
+  color-scheme: dark;
+}
+
+/* ── Keyframe Animations ──────────────────────────────────────────── */
+@keyframes blob {
+  0%   { transform: translate(0,   0)   scale(1);   }
+  33%  { transform: translate(30px, -50px) scale(1.1); }
+  66%  { transform: translate(-20px, 20px) scale(0.9); }
+  100% { transform: translate(0,   0)   scale(1);   }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+@keyframes overlayIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0;  }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-8px); }
+}
+
+@layer utilities {
+  .animate-blob {
+    animation: blob 7s infinite;
+  }
+  .animation-delay-2000 {
+    animation-delay: 2s;
+  }
+  .animation-delay-4000 {
+    animation-delay: 4s;
+  }
+  .animate-fade-in-up {
+    animation: fadeInUp 0.6s ease-out both;
+  }
+  .animate-modal-in {
+    animation: modalIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+  .animate-overlay-in {
+    animation: overlayIn 0.25s ease-out both;
+  }
+  .animate-shimmer {
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+}
+
+/* Staggered card entrance — use style={{ animationDelay: `${i*0.08}s` }} */
+.card-enter {
+  animation: fadeInUp 0.5s ease-out both;
+}
