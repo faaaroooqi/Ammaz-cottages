@@ -69,10 +69,9 @@ app.use("/api/admin/reports", require("../routes/report.routes"));
 app.use("/api/upload", require("../routes/upload.routes"));
 app.use("/api/reviews", require("../routes/review.routes"));
 
-// Wildcard route to serve index.html for client-side routing
-app.get("*", (req, res, next) => {
-  // Do not serve index.html for API requests
-  if (req.path.startsWith("/api")) {
+// Fallback route to serve index.html for React SPA client-side routing
+app.use((req, res, next) => {
+  if (req.path.startsWith("/api") || req.path.startsWith("/uploads") || req.path.startsWith("/health")) {
     return next();
   }
   res.sendFile(path.join(__dirname, "../../frontend/dist/index.html"));
