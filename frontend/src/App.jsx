@@ -29,6 +29,8 @@ import AdminLayout from "./layouts/AdminLayout";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import BookingVoucher from "./pages/BookingVoucher";
 import { AuthProvider } from "./context/AuthContext"; 
+import FloatingWidgets from "./components/FloatingWidgets";
+
 
 /* Hide Navbar on admin routes */ 
 function ConditionalNavbar() { 
@@ -95,6 +97,7 @@ function App() {
           <Route path="*" element={<Login />} /> 
         </Routes> 
         <ConditionalFooter />
+        <FloatingWidgets />
       </Router> 
     </AuthProvider> 
   ); 
