@@ -20,6 +20,12 @@ router.post(
 );
 
 // Profile Management
+router.get(
+  '/me',
+  auth,
+  authController.getMe
+);
+
 router.patch(
   '/me',
   auth,

@@ -14,12 +14,30 @@ function AccountSettings() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user) {
-      setName(user.name || user.username || "");
-      setEmail(user.email || "");
-      setPhone(user.phone || "");
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) return;
+      const res = await API.get("/auth/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const u = res.data.user;
+      setName(u.name || u.username || "");
+      setEmail(u.email || "");
+      setPhone(u.phone || "");
+      login(u, token);
+    } catch (err) {
+      console.error("Failed to fetch profile:", err);
+      if (user) {
+        setName(user.name || user.username || "");
+        setEmail(user.email || "");
+        setPhone(user.phone || "");
+      }
     }
-  }, [user]);
+  };
 
   const handleUpdateProfile = async () => {
     setLoading(true);

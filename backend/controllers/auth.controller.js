@@ -33,7 +33,16 @@ exports.login = async (req, res) => {
       return res.status(200).json({
         message: "Login successful",
         token,
-        user: { id: adminUser._id, name: adminUser.name, role: adminUser.role }
+        user: {
+          id: adminUser._id,
+          _id: adminUser._id,
+          name: adminUser.name,
+          email: adminUser.email,
+          phone: adminUser.phone || "",
+          role: adminUser.role,
+          profilePic: adminUser.profilePic || "",
+          discountPercentage: adminUser.discountPercentage || 0
+        }
       });
     }
 
@@ -64,9 +73,36 @@ exports.login = async (req, res) => {
       token,
       user: {
         id: user._id,
+        _id: user._id,
         name: user.name,
+        email: user.email,
+        phone: user.phone || "",
         role: user.role,
-        discountPercentage: user.discountPercentage
+        profilePic: user.profilePic || "",
+        discountPercentage: user.discountPercentage || 0
+      }
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
+
+exports.getMe = async (req, res) => {
+  try {
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    res.status(200).json({
+      user: {
+        id: user._id,
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        role: user.role,
+        profilePic: user.profilePic || "",
+        discountPercentage: user.discountPercentage || 0
       }
     });
   } catch (err) {
@@ -89,17 +125,19 @@ exports.register = async (req, res) => {
     name,
     email,
     password: password,
-   // role: 'staff' // or owner
   });
 
   res.status(201).json({
     message: 'User registered successfully',
     user: {
       id: user._id,
+      _id: user._id,
       name: user.name,
       email: user.email,
-      discountPercentage: user.discountPercentage
-      //role: user.role
+      phone: user.phone || "",
+      role: user.role,
+      profilePic: user.profilePic || "",
+      discountPercentage: user.discountPercentage || 0
     }
   });
 };
@@ -112,7 +150,7 @@ exports.updateProfile = async (req, res) => {
 
     if (email && email !== user.email) {
       const emailExists = await User.findOne({ email });
-      if (emailExists) {
+      if (emailExists && emailExists._id.toString() !== user._id.toString()) {
         return res.status(400).json({ message: "Email is already in use" });
       }
       user.email = email;
@@ -122,7 +160,7 @@ exports.updateProfile = async (req, res) => {
     if (phone !== undefined) user.phone = phone;
     
     if (password && password.trim() !== '') {
-      user.password = password; // The pre-save hook will hash it
+      user.password = password;
     }
 
     await user.save();
@@ -131,12 +169,13 @@ exports.updateProfile = async (req, res) => {
       message: "Profile updated successfully",
       user: {
         id: user._id,
+        _id: user._id,
         name: user.name,
         email: user.email,
-        phone: user.phone,
+        phone: user.phone || "",
         role: user.role,
-        profilePic: user.profilePic,
-        discountPercentage: user.discountPercentage
+        profilePic: user.profilePic || "",
+        discountPercentage: user.discountPercentage || 0
       }
     });
   } catch (err) {
@@ -318,10 +357,18 @@ exports.resetPassword = async (req, res) => {
  */
 exports.getContactInfo = async (req, res) => {
   try {
-    // Find the first owner account that has a phone number set
-    const admin = await User.findOne({ role: 'owner' })
+    // Find owner account prioritizing non-empty phone and most recently updated
+    let admin = await User.findOne({ role: 'owner', phone: { $exists: true, $ne: "" } })
       .select('phone email')
+      .sort({ updatedAt: -1 })
       .lean();
+
+    if (!admin) {
+      admin = await User.findOne({ role: 'owner' })
+        .select('phone email')
+        .sort({ updatedAt: -1 })
+        .lean();
+    }
 
     res.status(200).json({
       phone: admin?.phone || null,
