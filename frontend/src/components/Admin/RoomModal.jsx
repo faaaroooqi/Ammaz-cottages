@@ -14,6 +14,7 @@ function RoomModal({ isOpen, onClose, onSave, roomData }) {
     pricePerNight: "",
     capacity: 2,
     description: "",
+    accommodations: "",
     facilities: [],
     status: "available",
     isActive: true
@@ -35,6 +36,7 @@ function RoomModal({ isOpen, onClose, onSave, roomData }) {
         pricePerNight: roomData.pricePerNight || "",
         capacity: roomData.capacity || 2,
         description: roomData.description || "",
+        accommodations: roomData.accommodations || "",
         facilities: roomData.facilities || [],
         status: roomData.status || "available",
         isActive: roomData.isActive !== undefined ? roomData.isActive : true
@@ -47,6 +49,7 @@ function RoomModal({ isOpen, onClose, onSave, roomData }) {
         pricePerNight: "",
         capacity: 2,
         description: "",
+        accommodations: "",
         facilities: [],
         status: "available",
         isActive: true
@@ -89,11 +92,11 @@ function RoomModal({ isOpen, onClose, onSave, roomData }) {
       showError("Some files were skipped. Only JPEG, PNG, WebP under 5 MB are accepted.");
     }
 
-    const remaining = 5 - totalImages;
+    const remaining = 10 - totalImages;
     const toAdd = valid.slice(0, remaining);
 
     if (toAdd.length < valid.length) {
-      showError(`Only ${remaining} more image(s) can be added (max 5 total).`);
+      showError(`Only ${remaining} more image(s) can be added (max 10 total).`);
     }
 
     setNewFiles((prev) => [...prev, ...toAdd]);
@@ -233,6 +236,12 @@ function RoomModal({ isOpen, onClose, onSave, roomData }) {
             <textarea name="description" value={formData.description} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2.5 bg-gray-50 focus:bg-white transition" rows="2" />
           </div>
 
+          {/* Accommodations Text Detail */}
+          <div>
+            <label className="block text-sm font-bold text-gray-700 mb-1">Accommodations (e.g. Two persons accommodation)</label>
+            <input type="text" name="accommodations" value={formData.accommodations} onChange={handleChange} className="w-full border border-gray-200 rounded-lg p-2.5 bg-gray-50 focus:bg-white transition" placeholder="e.g. Two persons accommodation for this room" />
+          </div>
+
           {/* Amenities */}
           <div>
             <label className="block text-sm font-bold text-gray-700 mb-2">Amenities</label>
@@ -263,7 +272,7 @@ function RoomModal({ isOpen, onClose, onSave, roomData }) {
           <div>
             <div className="flex items-center justify-between mb-2">
               <label className="block text-sm font-bold text-gray-700">Room Images</label>
-              <span className="text-xs text-gray-500 font-medium">{totalImages}/5 images</span>
+              <span className="text-xs text-gray-500 font-medium">{totalImages}/10 images</span>
             </div>
 
             {/* Existing + New Image Previews */}
@@ -312,7 +321,7 @@ function RoomModal({ isOpen, onClose, onSave, roomData }) {
             )}
 
             {/* Drag & Drop Zone */}
-            {totalImages < 5 && (
+            {totalImages < 10 && (
               <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -337,7 +346,7 @@ function RoomModal({ isOpen, onClose, onSave, roomData }) {
                   {isDragging ? "Drop images here!" : "Drag & drop images here, or click to browse"}
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  JPEG, PNG, WebP • Max 5 MB each • Up to {5 - totalImages} more
+                  JPEG, PNG, WebP • Max 5 MB each • Up to {10 - totalImages} more
                 </p>
               </div>
             )}

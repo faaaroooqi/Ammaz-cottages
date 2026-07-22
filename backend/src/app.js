@@ -68,6 +68,7 @@ app.use("/api/admin", require("../routes/admin.routes"));
 app.use("/api/admin/reports", require("../routes/report.routes"));
 app.use("/api/upload", require("../routes/upload.routes"));
 app.use("/api/reviews", require("../routes/review.routes"));
+app.use("/api/discounts", require("../routes/discount.routes"));
 
 // Fallback route to serve index.html for React SPA client-side routing
 app.use((req, res, next) => {

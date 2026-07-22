@@ -24,7 +24,7 @@ const uploadRoomImages = multer({
   storage,
   limits: { fileSize: 5 * 1024 * 1024 }, // 5 MB per file
   fileFilter: imageFilter
-}).array('images', 5);
+}).array('images', 10);
 
 // ─── Single Image (generic) ────────────────────────────────────────
 const uploadSingleImage = multer({

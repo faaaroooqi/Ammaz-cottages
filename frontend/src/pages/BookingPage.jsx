@@ -1,8 +1,9 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import API from "../utils/api";
 import { showSuccess, showError } from "../utils/toast";
+import { evaluateBookingDiscounts, getPublicDiscounts } from "../services/admin.service";
 
 function BookingPage() {
   const { id } = useParams();
@@ -21,11 +22,38 @@ function BookingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Storewide discount state
+  const [storewideInfo, setStorewideInfo] = useState({ durationDiscount: { percentage: 0 }, dateDiscount: { percentage: 0 } });
+  const [allPublicDiscounts, setAllPublicDiscounts] = useState(null);
+
   // ID Card Upload Modal State
   const [showIdModal, setShowIdModal] = useState(false);
   const [createdBooking, setCreatedBooking] = useState(null);
   const [idFiles, setIdFiles] = useState([]);
   const [uploadingId, setUploadingId] = useState(false);
+
+  // Evaluate discounts on mount or when dates change
+  useEffect(() => {
+    if (!checkIn || !checkOut) return;
+
+    // Fetch public rules for up-sell tips
+    getPublicDiscounts()
+      .then((res) => setAllPublicDiscounts(res.data))
+      .catch(() => {});
+
+    // Evaluate for exact selected dates
+    const inD = new Date(checkIn);
+    const outD = new Date(checkOut);
+    inD.setHours(0, 0, 0, 0);
+    outD.setHours(0, 0, 0, 0);
+    const diffT = Math.abs(outD - inD);
+    const diffD = Math.ceil(diffT / (1000 * 60 * 60 * 24));
+    const calcNights = diffD > 0 ? diffD : 1;
+
+    evaluateBookingDiscounts({ nights: calcNights, checkIn, checkOut })
+      .then((res) => setStorewideInfo(res.data))
+      .catch(() => {});
+  }, [checkIn, checkOut]);
 
   if (!room || !checkIn || !checkOut) {
     return (
@@ -40,7 +68,7 @@ function BookingPage() {
     );
   }
 
-  // Calculate nights exactly like the backend to show correct total
+  // Calculate nights
   const inDate = new Date(checkIn);
   const outDate = new Date(checkOut);
   inDate.setHours(0, 0, 0, 0);
@@ -49,9 +77,37 @@ function BookingPage() {
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
   const nights = diffDays > 0 ? diffDays : 1;
   const baseAmount = nights * room.pricePerNight;
-  const discountPercentage = user?.discountPercentage || 0;
-  const discountAmount = discountPercentage > 0 ? (baseAmount * discountPercentage) / 100 : 0;
-  const totalAmount = baseAmount - discountAmount;
+
+  // Individual discounts
+  const loyaltyPct = user?.discountPercentage || 0;
+  const durationPct = storewideInfo?.durationDiscount?.percentage || 0;
+  const datePct = storewideInfo?.dateDiscount?.percentage || 0;
+
+  const totalDiscountPct = Math.min(100, loyaltyPct + durationPct + datePct);
+  const totalDiscountAmount = Math.round((baseAmount * totalDiscountPct) / 100);
+  const totalAmount = Math.max(0, baseAmount - totalDiscountAmount);
+
+  // Up-sell tip helper (e.g. if nights is 5, tip for 7 days)
+  const getUpsellTip = () => {
+    if (!allPublicDiscounts?.stayDiscounts) return null;
+    const { sevenDays, fifteenDays, thirtyDays } = allPublicDiscounts.stayDiscounts;
+
+    if (nights < 7 && sevenDays?.enabled && sevenDays.percentage > 0) {
+      const needed = 7 - nights;
+      return `💡 Book ${needed} more ${needed === 1 ? 'night' : 'nights'} to unlock a ${sevenDays.percentage}% Long-Stay Discount!`;
+    }
+    if (nights >= 7 && nights < 15 && fifteenDays?.enabled && fifteenDays.percentage > 0) {
+      const needed = 15 - nights;
+      return `💡 Book ${needed} more ${needed === 1 ? 'night' : 'nights'} to upgrade to a ${fifteenDays.percentage}% Long-Stay Discount!`;
+    }
+    if (nights >= 15 && nights < 30 && thirtyDays?.enabled && thirtyDays.percentage > 0) {
+      const needed = 30 - nights;
+      return `💡 Book ${needed} more ${needed === 1 ? 'night' : 'nights'} to upgrade to a ${thirtyDays.percentage}% Long-Stay Discount!`;
+    }
+    return null;
+  };
+
+  const upsellTip = getUpsellTip();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -63,7 +119,6 @@ function BookingPage() {
     setError("");
 
     try {
-      // 1. Create booking
       const res = await API.post("/bookings", {
         roomId: room._id,
         checkIn,
@@ -76,7 +131,7 @@ function BookingPage() {
       const newBooking = res.data.booking;
       setCreatedBooking(newBooking);
       showSuccess("Details saved successfully!");
-      setShowIdModal(true); // Open ID modal instead of navigating to payment immediately
+      setShowIdModal(true);
 
     } catch (err) {
       console.error(err);
@@ -98,45 +153,61 @@ function BookingPage() {
     try {
       const data = new FormData();
       Array.from(idFiles).forEach(file => {
-        data.append("images", file);
+        data.append("idCards", file);
       });
 
-      await API.post(`/bookings/${createdBooking._id}/idcards`, data, {
+      await API.post(`/bookings/${createdBooking._id}/upload-id-cards`, data, {
         headers: {
-          "Content-Type": "multipart/form-data",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data"
         }
       });
 
-      // Redirect to payment pending
-      showSuccess("ID uploaded successfully!");
-      navigate("/payment/pending", { state: { booking: createdBooking } });
+      showSuccess("ID Card uploaded successfully!");
+      setShowIdModal(false);
+      navigate(`/payment/pending?bookingId=${createdBooking._id}`);
     } catch (err) {
-      console.error("Failed to upload ID cards", err);
+      console.error(err);
       showError("Failed to upload ID cards. Please try again.");
     } finally {
       setUploadingId(false);
     }
   };
 
-  return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8 font-sans flex flex-col justify-center relative">
-      <div className="max-w-5xl mx-auto w-full">
-        <div className="mb-6">
-          <button 
-            onClick={() => navigate("/")} 
-            className="flex items-center text-gray-500 hover:text-blue-600 font-medium transition-colors w-fit"
-          >
-            <span className="mr-2">←</span> Back to Rooms
-          </button>
-        </div>
+  const handleSkipIdUpload = () => {
+    setShowIdModal(false);
+    navigate(`/payment/pending?bookingId=${createdBooking._id}`);
+  };
 
-        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row border border-gray-100 dark:border-gray-800">
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto">
+        <button 
+          onClick={() => navigate(-1)}
+          className="inline-flex items-center text-sm font-semibold text-gray-500 hover:text-blue-600 transition mb-6"
+        >
+          <svg className="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path></svg>
+          Back to Room Details
+        </button>
+
+        {/* Up-sell / Discount Notification Callout */}
+        {upsellTip && (
+          <div className="bg-gradient-to-r from-amber-500 to-orange-500 text-white font-bold p-4 rounded-2xl shadow-md mb-6 flex items-center justify-between animate-pulse">
+            <span className="text-sm md:text-base">{upsellTip}</span>
+            <button
+              onClick={() => navigate(-1)}
+              className="px-3 py-1 bg-white text-orange-600 rounded-lg text-xs font-black hover:bg-orange-50 transition"
+            >
+              Adjust Dates
+            </button>
+          </div>
+        )}
+
+        <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-xl overflow-hidden flex flex-col lg:flex-row border border-gray-100 dark:border-gray-800">
           
-          {/* Left Column: Summary Card */}
-          <div className="lg:w-2/5 bg-gradient-to-br from-indigo-900 to-blue-900 text-white p-8 flex flex-col relative overflow-hidden">
-            {/* Decorative background elements */}
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
+          {/* Left Column: Room Summary */}
+          <div className="lg:w-2/5 bg-gradient-to-br from-blue-900 via-indigo-900 to-slate-900 text-white p-8 lg:p-12 flex flex-col justify-between relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500 opacity-20 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2"></div>
             <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-400 opacity-20 rounded-full blur-3xl transform -translate-x-1/2 translate-y-1/2"></div>
             
             <div className="relative z-10 flex-1">
@@ -163,13 +234,24 @@ function BookingPage() {
                     <span className="text-blue-200 text-sm font-medium">Rate</span>
                     <span className="font-bold">PKR {room.pricePerNight} / night</span>
                   </div>
-                  {discountPercentage > 0 && (
-                    <div className="flex justify-between items-center mt-2 text-green-300">
-                      <span className="text-sm font-bold flex items-center">
-                        <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"></path></svg>
-                        Loyalty Discount ({discountPercentage}%)
-                      </span>
-                      <span className="font-bold">- PKR {discountAmount.toLocaleString()}</span>
+
+                  {/* Active Discounts Breakdown */}
+                  {loyaltyPct > 0 && (
+                    <div className="flex justify-between items-center text-green-300 text-xs font-bold pt-2 border-t border-white/10">
+                      <span>Loyalty Discount ({loyaltyPct}%)</span>
+                      <span>- PKR {((baseAmount * loyaltyPct) / 100).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {durationPct > 0 && (
+                    <div className="flex justify-between items-center text-yellow-300 text-xs font-bold">
+                      <span>{storewideInfo.durationDiscount.label}</span>
+                      <span>- PKR {((baseAmount * durationPct) / 100).toLocaleString()}</span>
+                    </div>
+                  )}
+                  {datePct > 0 && (
+                    <div className="flex justify-between items-center text-amber-300 text-xs font-bold">
+                      <span>{storewideInfo.dateDiscount.label}</span>
+                      <span>- PKR {((baseAmount * datePct) / 100).toLocaleString()}</span>
                     </div>
                   )}
                 </div>
@@ -180,7 +262,7 @@ function BookingPage() {
               <div className="flex justify-between items-end">
                 <span className="text-lg text-blue-200 font-medium">Total Amount</span>
                 <div className="text-right">
-                  {discountPercentage > 0 && (
+                  {totalDiscountPct > 0 && (
                     <div className="text-sm text-blue-200/70 line-through mb-1">PKR {baseAmount.toLocaleString()}</div>
                   )}
                   <span className="text-4xl font-extrabold tracking-tight">PKR {totalAmount.toLocaleString()}</span>
@@ -230,7 +312,9 @@ function BookingPage() {
                     className="w-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white p-4 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none font-semibold shadow-sm"
                   />
                 </div>
+              </div>
 
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
                   <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Phone Number</label>
                   <input
@@ -243,113 +327,94 @@ function BookingPage() {
                     className="w-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white p-4 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none font-semibold shadow-sm"
                   />
                 </div>
-                
+
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">CNIC <span className="text-gray-400 dark:text-gray-500 font-normal">(Required)</span></label>
+                  <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">CNIC / Passport No.</label>
                   <input
                     type="text"
                     name="customerCnic"
                     value={formData.customerCnic}
                     onChange={handleChange}
-                    placeholder="12345-6789012-3"
+                    required
+                    placeholder="42101-1234567-1"
                     className="w-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 text-gray-900 dark:text-white p-4 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-700 transition-all outline-none font-semibold shadow-sm"
                   />
                 </div>
               </div>
 
-              <div className="pt-8 mt-8 border-t border-gray-100 dark:border-gray-800">
+              <div className="pt-6">
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold text-lg py-4 rounded-xl shadow-lg hover:shadow-xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all transform hover:-translate-y-0.5 active:scale-[0.98] flex justify-center items-center"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-extrabold py-5 px-8 rounded-2xl shadow-lg hover:shadow-blue-500/25 transition-all duration-300 transform hover:-translate-y-0.5 active:translate-y-0 text-lg flex items-center justify-center space-x-2 disabled:opacity-50"
                 >
                   {loading ? (
-                    <span className="flex items-center">
-                      <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                      </svg>
-                      Processing...
-                    </span>
+                    <>
+                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                      <span>Processing...</span>
+                    </>
                   ) : (
-                    "Confirm & Proceed to ID Upload"
+                    <>
+                      <span>Continue to Payment</span>
+                      <svg className="w-5 h-5 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </>
                   )}
                 </button>
-                <p className="text-center text-xs text-gray-400 dark:text-gray-500 font-medium mt-4">
-                  For security purposes, you will be required to upload your ID card pictures next.
-                </p>
               </div>
             </form>
           </div>
+
         </div>
       </div>
 
-      {/* ID Upload Modal */}
+      {/* ID Card Upload Modal */}
       {showIdModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/80 backdrop-blur-sm animate-overlay-in">
-          <div className="bg-white dark:bg-gray-900 rounded-3xl shadow-2xl max-w-md w-full p-8 relative animate-modal-in border border-gray-100 dark:border-gray-800">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fadeIn">
+          <div className="bg-white dark:bg-gray-900 rounded-3xl max-w-lg w-full p-8 shadow-2xl border border-gray-100 dark:border-gray-800">
             <div className="text-center mb-6">
-              <div className="w-16 h-16 bg-blue-100 dark:bg-blue-900/30 rounded-full flex items-center justify-center mx-auto mb-4 text-3xl">
+              <div className="w-16 h-16 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-full flex items-center justify-center mx-auto mb-4 text-2xl font-bold">
                 🪪
               </div>
-              <h3 className="text-2xl font-bold text-gray-900 dark:text-white">Security Check</h3>
-              <p className="text-gray-500 dark:text-gray-400 mt-2 text-sm font-medium">
-                Please upload clear pictures of your ID card (Front & Back) to secure your booking.
+              <h3 className="text-2xl font-extrabold text-gray-900 dark:text-white">Upload ID Card Photo</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
+                Please attach a photo of your CNIC or Passport for guest verification. You can also skip this and upload it later.
               </p>
             </div>
 
-            <div className="space-y-4">
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-2xl p-6 text-center hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors cursor-pointer relative overflow-hidden">
-                <input 
-                  type="file" 
-                  multiple 
-                  accept="image/*" 
-                  onChange={(e) => setIdFiles(e.target.files)}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-                <div className="flex flex-col items-center pointer-events-none">
-                  <svg className="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                  <p className="font-semibold text-gray-700 dark:text-gray-300">Click to select images</p>
-                  <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
-                </div>
-              </div>
-
+            <div className="mb-6">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                onChange={(e) => setIdFiles(e.target.files)}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 transition"
+              />
               {idFiles.length > 0 && (
-                <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-4 border border-gray-100 dark:border-gray-700">
-                  <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Selected Files</h4>
-                  <ul className="space-y-2">
-                    {Array.from(idFiles).map((f, i) => (
-                      <li key={i} className="text-sm font-medium text-gray-800 dark:text-gray-200 flex items-center">
-                        <span className="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
-                        {f.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <p className="text-xs text-green-600 font-semibold mt-2">
+                  {idFiles.length} file(s) selected
+                </p>
               )}
+            </div>
 
+            <div className="flex gap-3">
+              <button
+                onClick={handleSkipIdUpload}
+                disabled={uploadingId}
+                className="flex-1 py-3 px-4 bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 text-gray-700 dark:text-gray-300 font-bold rounded-xl transition text-sm"
+              >
+                Skip for now
+              </button>
               <button
                 onClick={handleIdUpload}
-                disabled={uploadingId || idFiles.length === 0}
-                className="w-full mt-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 transition-all flex justify-center items-center"
+                disabled={uploadingId}
+                className="flex-1 py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition text-sm shadow-md disabled:opacity-50"
               >
-                {uploadingId ? (
-                  <span className="flex items-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Uploading & Saving...
-                  </span>
-                ) : (
-                  "Upload & Continue to Payment"
-                )}
+                {uploadingId ? "Uploading..." : "Upload & Continue"}
               </button>
             </div>
           </div>
         </div>
       )}
-
     </div>
   );
 }

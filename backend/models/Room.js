@@ -22,6 +22,10 @@ const roomSchema = new mongoose.Schema(
       type: String,
       default: ""
     },
+    accommodations: {
+      type: String,
+      default: ""
+    },
     facilities: {
       type: [String],
       default: []

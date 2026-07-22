@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import API from "../utils/api";
+import StorewideDiscountBanner from "../components/StorewideDiscountBanner";
 
 /* ── Tiny Image Carousel ──────────────────────────────────────────── */
 function ImageCarousel({ images, alt }) {
@@ -196,6 +197,8 @@ function PublicRoomsList() {
             </span>
           )}
         </div>
+
+        <StorewideDiscountBanner />
 
         {/* Room Grid */}
         {loading ? (

@@ -4,6 +4,7 @@ import API from "../utils/api";
 import { showError } from "../utils/toast";
 import CalendarModal from "../components/CalendarModal";
 import RoomDetailsModal from "../components/RoomDetailsModal";
+import StorewideDiscountBanner from "../components/StorewideDiscountBanner";
 
 /* ── Tiny Image Carousel ──────────────────────────────────────────── */
 function ImageCarousel({ images, alt }) {
@@ -276,6 +277,9 @@ function RoomsList() {
             </span>
           )}
         </div>
+
+        {/* Storewide Discounts Banner */}
+        <StorewideDiscountBanner />
 
         {/* Rooms Grid */}
         {loading ? (

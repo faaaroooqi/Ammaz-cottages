@@ -117,3 +117,12 @@ export const deletePaymentOption = (id) =>
 /* --- Email Logs / Mailbox --- */
 export const getEmailLogs = (params) => API.get("/admin/emails", { params });
 export const getEmailLogById = (id) => API.get(`/admin/emails/${id}`);
+
+/* --- Global & Storewide Discounts --- */
+export const getAdminDiscounts = () => API.get("/discounts/admin");
+export const updateStayDiscounts = (data) => API.put("/discounts/admin/stay", data);
+export const addDateDiscount = (data) => API.post("/discounts/admin/date", data);
+export const updateDateDiscount = (id, data) => API.put(`/discounts/admin/date/${id}`, data);
+export const deleteDateDiscount = (id) => API.delete(`/discounts/admin/date/${id}`);
+export const getPublicDiscounts = () => API.get("/discounts/public");
+export const evaluateBookingDiscounts = (data) => API.post("/discounts/evaluate", data);

@@ -42,7 +42,7 @@ function ManageRooms() {
         loadRooms();
       } catch (err) {
         console.error("Error deleting room", err);
-        showError("Failed to delete room");
+        showError(err.response?.data?.message || "Failed to delete room");
       }
     }
   };

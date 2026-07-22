@@ -24,14 +24,29 @@ exports.createBooking = async (bookingData) => {
   }
 
   const User = require('../models/User');
+  const discountService = require('./discount.service');
   const user = await User.findById(userId);
   const discount = user ? (user.discountPercentage || 0) : 0;
+
+  const inDate = new Date(checkIn);
+  const outDate = new Date(checkOut);
+  inDate.setHours(0, 0, 0, 0);
+  outDate.setHours(0, 0, 0, 0);
+  const calcNights = Math.max(1, Math.ceil(Math.abs(outDate - inDate) / (1000 * 60 * 60 * 24)));
+
+  const globalEval = await discountService.evaluateGlobalDiscounts({
+    nights: calcNights,
+    checkIn,
+    checkOut
+  });
 
   const pricing = pricingService.calculateBookingPrice({
     pricePerNight: room.pricePerNight,
     checkIn,
     checkOut,
-    discount
+    discount,
+    durationDiscount: globalEval.durationDiscount.percentage,
+    dateDiscount: globalEval.dateDiscount.percentage
   });
 
   const bookingId = `BKG-${uuidv4().substring(0, 8).toUpperCase()}`;
