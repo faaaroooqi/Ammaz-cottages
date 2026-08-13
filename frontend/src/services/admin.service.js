@@ -117,6 +117,8 @@ export const deletePaymentOption = (id) =>
 /* --- Email Logs / Mailbox --- */
 export const getEmailLogs = (params) => API.get("/admin/emails", { params });
 export const getEmailLogById = (id) => API.get(`/admin/emails/${id}`);
+export const resendEmailLog = (id) => API.post(`/admin/emails/${id}/resend`);
+
 
 /* --- Global & Storewide Discounts --- */
 export const getAdminDiscounts = () => API.get("/discounts/admin");

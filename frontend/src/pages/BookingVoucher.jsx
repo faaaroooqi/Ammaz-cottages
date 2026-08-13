@@ -32,24 +32,24 @@ function BookingVoucher() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (error || !booking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center bg-white p-12 rounded-3xl shadow-sm border border-gray-100 max-w-md">
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 p-6">
+        <div className="text-center bg-white dark:bg-slate-900 p-10 rounded-3xl shadow-xl border border-slate-200 dark:border-slate-800 max-w-md">
           <div className="text-5xl mb-4">❌</div>
-          <h2 className="text-2xl font-bold mb-3 text-gray-800">Booking Not Found</h2>
-          <p className="text-gray-500 mb-6">{error || "This booking could not be loaded."}</p>
+          <h2 className="text-2xl font-black text-slate-900 dark:text-white mb-2">Voucher Unavailable</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-6">{error || "Reservation details could not be retrieved."}</p>
           <button
             onClick={() => navigate("/my-bookings")}
-            className="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold hover:bg-blue-700 transition"
+            className="w-full py-3 bg-indigo-600 text-white text-xs font-black uppercase tracking-wider rounded-2xl shadow-md transition"
           >
-            Go to My Bookings
+            Back to Reservations
           </button>
         </div>
       </div>
@@ -67,137 +67,132 @@ function BookingVoucher() {
 
   return (
     <>
-      {/* Print-specific styles */}
       <style>{`
         @media print {
           .no-print { display: none !important; }
           body { background: white !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          .voucher-card { box-shadow: none !important; border: 1px solid #e5e7eb !important; }
+          .voucher-card { box-shadow: none !important; border: 1px solid #cbd5e1 !important; }
         }
       `}</style>
 
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-gray-950 dark:to-gray-900 py-12 px-4 font-sans">
-        {/* Action bar */}
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-12 px-4 sm:px-6 font-sans">
+        
+        {/* Header Action Bar */}
         <div className="max-w-2xl mx-auto mb-6 flex items-center justify-between no-print">
           <button
             onClick={() => navigate("/my-bookings")}
-            className="flex items-center text-gray-500 hover:text-blue-600 font-medium transition"
+            className="inline-flex items-center text-xs font-black text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-4 py-2 rounded-full shadow-sm transition"
           >
-            <span className="mr-2">←</span> Back to My Bookings
+            ← Back to My Reservations
           </button>
-          <div className="flex gap-3">
-            <button
-              onClick={handlePrint}
-              className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-5 py-2.5 rounded-xl font-bold hover:from-blue-700 hover:to-indigo-700 transition shadow-lg flex items-center gap-2"
-            >
-              🖨️ Print / Download PDF
-            </button>
-          </div>
+          <button
+            onClick={handlePrint}
+            className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-xs font-black uppercase tracking-wider px-5 py-2.5 rounded-full shadow-lg shadow-indigo-500/20 transition flex items-center gap-2"
+          >
+            🖨️ Print / Save PDF Pass
+          </button>
         </div>
 
-        {/* Voucher Card */}
-        <div className="voucher-card max-w-2xl mx-auto bg-white dark:bg-gray-900 rounded-3xl shadow-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-          {/* Header */}
-          <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white p-8 text-center relative">
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500" />
-            <div className="text-sm uppercase tracking-[0.2em] text-blue-300 font-bold mb-2">
-              Official Booking Voucher
+        {/* Digital Boarding Pass Voucher Card */}
+        <div className="voucher-card max-w-2xl mx-auto bg-white dark:bg-slate-900 rounded-3xl shadow-2xl border border-slate-200/80 dark:border-slate-800 overflow-hidden">
+          
+          {/* Header Pass Banner */}
+          <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 text-white p-8 text-center relative overflow-hidden">
+            <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-500" />
+            
+            <div className="text-[10px] uppercase tracking-[0.25em] text-indigo-300 font-black mb-2">
+              Official Guest House Reservation Pass
             </div>
-            <h1 className="text-3xl font-extrabold tracking-tight mb-1">🧾 Booking Receipt</h1>
-            <p className="text-blue-200 text-sm font-medium">Guest House</p>
+            <h1 className="text-3xl font-black tracking-tight text-white mb-1">Ammaz Cottages Voucher</h1>
+            <p className="text-xs text-indigo-200/80 font-medium">Verified Digital Guest Pass</p>
 
-            <div className="mt-5 inline-block bg-white/10 border border-white/20 rounded-xl px-6 py-3 backdrop-blur-sm">
-              <span className="text-xs text-blue-300 uppercase font-bold tracking-wider block">Booking ID</span>
-              <span className="text-xl font-mono font-extrabold tracking-wider">{booking.bookingId}</span>
+            <div className="mt-6 inline-flex flex-col items-center bg-white/10 border border-white/20 rounded-2xl px-8 py-3 backdrop-blur-md">
+              <span className="text-[10px] text-indigo-300 uppercase font-black tracking-widest mb-0.5">Booking Reference ID</span>
+              <span className="text-2xl font-mono font-black tracking-wider text-white">{booking.bookingId}</span>
             </div>
           </div>
 
-          {/* Body */}
-          <div className="p-8 space-y-8">
-            {/* Payment Status */}
+          {/* Pass Body Info */}
+          <div className="p-8 space-y-6">
+            
+            {/* Status Pill */}
             <div className="flex justify-center">
               {isPaid ? (
-                <span className="inline-flex items-center gap-2 bg-green-50 text-green-700 border border-green-200 px-6 py-2.5 rounded-full text-sm font-bold">
-                  ✅ Payment Confirmed
+                <span className="inline-flex items-center gap-1.5 bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider">
+                  ✅ Reservation Confirmed & Paid
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-2 bg-amber-50 text-amber-700 border border-amber-200 px-6 py-2.5 rounded-full text-sm font-bold">
-                  ⏳ Payment Pending
+                <span className="inline-flex items-center gap-1.5 bg-amber-50 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 border border-amber-200 dark:border-amber-800 px-5 py-2 rounded-full text-xs font-black uppercase tracking-wider">
+                  ⏳ Verification Pending
                 </span>
               )}
             </div>
 
-            {/* Guest Information */}
+            {/* Guest Details Box */}
             <div>
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400 mb-3 pb-2 border-b-2 border-gray-100">
-                Guest Information
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 pb-1 border-b border-slate-100 dark:border-slate-800">
+                Primary Guest Registration
               </h3>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 space-y-3 border border-gray-100 dark:border-gray-700">
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 space-y-2 border border-slate-200/60 dark:border-slate-700/60">
                 <Row label="Guest Name" value={booking.customer?.name || "Guest"} />
-                {booking.customer?.phone && <Row label="Phone" value={booking.customer.phone} />}
-                {booking.customer?.email && <Row label="Email" value={booking.customer.email} />}
-                {booking.customer?.cnic && <Row label="CNIC" value={booking.customer.cnic} />}
+                {booking.customer?.phone && <Row label="Contact Phone" value={booking.customer.phone} />}
+                {booking.customer?.email && <Row label="Registered Email" value={booking.customer.email} />}
+                {booking.customer?.cnic && <Row label="CNIC / Passport" value={booking.customer.cnic} />}
               </div>
             </div>
 
-            {/* Reservation Details */}
+            {/* Room Reservation Details */}
             <div>
-              <h3 className="text-[11px] font-bold uppercase tracking-[0.12em] text-gray-400 mb-3 pb-2 border-b-2 border-gray-100">
-                Reservation Details
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 pb-1 border-b border-slate-100 dark:border-slate-800">
+                Stay Particulars
               </h3>
-              <div className="bg-gray-50 dark:bg-gray-800 rounded-xl p-5 space-y-3 border border-gray-100 dark:border-gray-700">
-                <Row label="Room" value={booking.room?.name || "Room"} />
-                <Row label="Check-in" value={fmtDate(booking.checkIn)} />
-                <Row label="Check-out" value={fmtDate(booking.checkOut)} />
+              <div className="bg-slate-50 dark:bg-slate-800/50 rounded-2xl p-5 space-y-2 border border-slate-200/60 dark:border-slate-700/60">
+                <Row label="Reserved Room" value={booking.room?.name || "Suite"} />
+                <Row label="Check-in Date" value={fmtDate(booking.checkIn)} />
+                <Row label="Check-out Date" value={fmtDate(booking.checkOut)} />
                 <Row label="Duration" value={`${booking.nights} Night${booking.nights > 1 ? "s" : ""}`} />
               </div>
             </div>
 
-            {/* Total */}
-            <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 text-center">
-              <div className="text-xs uppercase tracking-[0.15em] text-blue-300 font-bold mb-1">Total Amount</div>
-              <div className="text-4xl font-extrabold tracking-tight">
+            {/* Total Paid Box */}
+            <div className="bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 text-white rounded-2xl p-6 text-center">
+              <span className="text-[10px] uppercase tracking-widest text-indigo-300 font-black block mb-1">Grand Total Amount</span>
+              <div className="text-3xl font-black tracking-tight text-white">
                 PKR {Number(booking.totalAmount).toLocaleString()}
               </div>
-              {isPaid && (
-                <div className="mt-3 inline-block bg-green-500/20 text-green-300 px-4 py-1.5 rounded-full text-xs font-bold border border-green-400/30">
-                  ✅ PAID
-                </div>
-              )}
             </div>
 
-            {/* Note */}
-            <div className="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 rounded-lg px-5 py-4 text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
-              📌 Please keep this voucher as your official booking receipt. You may be asked to present it at check-in.
+            {/* Check-in note */}
+            <div className="bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200/60 dark:border-indigo-800/60 rounded-2xl p-4 text-xs text-indigo-800 dark:text-indigo-300 font-medium leading-relaxed">
+              📌 Present this digital voucher pass along with your original CNIC / Passport at resort check-in desk.
             </div>
+
           </div>
 
-          {/* Footer */}
-          <div className="border-t border-gray-100 dark:border-gray-800 px-8 py-5 text-center space-y-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-gray-300 font-bold">
-              Official Booking Voucher
+          {/* Footer Bar */}
+          <div className="border-t border-slate-100 dark:border-slate-800 px-8 py-4 text-center space-y-1 bg-slate-50/50 dark:bg-slate-900/50">
+            <p className="text-[10px] uppercase tracking-widest text-slate-400 font-black">
+              Ammaz Cottages Official Voucher Pass
             </p>
-            <p className="text-xs text-gray-400">
-              © {new Date().getFullYear()} Guest House. All rights reserved.
-            </p>
-            <p className="text-[10px] text-gray-300">
+            <p className="text-[10px] text-slate-400 font-medium">
               Generated on {new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })}
             </p>
           </div>
+
         </div>
       </div>
     </>
   );
 }
 
-/* Detail row helper */
 function Row({ label, value }) {
   return (
-    <div className="flex justify-between items-center py-1.5 border-b border-gray-100 dark:border-gray-700 last:border-b-0">
-      <span className="text-sm text-gray-500 dark:text-gray-400">{label}</span>
-      <span className="text-sm font-semibold text-gray-800 dark:text-gray-200 text-right">{value}</span>
+    <div className="flex justify-between items-center py-1 border-b border-slate-200/40 dark:border-slate-700/40 last:border-b-0">
+      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">{label}</span>
+      <span className="text-xs font-black text-slate-900 dark:text-slate-100 text-right">{value}</span>
     </div>
   );
 }
 
 export default BookingVoucher;
+

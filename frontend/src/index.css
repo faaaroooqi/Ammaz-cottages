@@ -2,15 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
-/* ── Dark-mode scrollbar ──────────────────────────────────────────── */
+/* ── Custom Scrollbar ───────────────────────────────────────────── */
 ::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: #f8fafc;
 }
 .dark ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: #0f172a;
 }
 ::-webkit-scrollbar-thumb {
   background: linear-gradient(180deg, #6366f1, #3b82f6);
@@ -20,55 +21,55 @@
   background: linear-gradient(180deg, #4f46e5, #2563eb);
 }
 
-/* ── Dark body/html defaults ─────────────────────────────────────── */
+/* ── Body & Theme Base ─────────────────────────────────────────── */
 body {
-  @apply bg-gray-50 text-gray-900 transition-colors duration-300;
+  @apply bg-slate-50 text-slate-900 transition-colors duration-300 antialiased selection:bg-indigo-500 selection:text-white;
 }
 
 .dark body {
-  @apply bg-gray-950 text-gray-100;
+  @apply bg-slate-950 text-slate-100;
 }
 
 .dark {
   color-scheme: dark;
 }
 
-/* ── Keyframe Animations ──────────────────────────────────────────── */
+/* ── Custom Animations ─────────────────────────────────────────── */
 @keyframes blob {
-  0%   { transform: translate(0,   0)   scale(1);   }
-  33%  { transform: translate(30px, -50px) scale(1.1); }
-  66%  { transform: translate(-20px, 20px) scale(0.9); }
-  100% { transform: translate(0,   0)   scale(1);   }
+  0%   { transform: translate(0, 0) scale(1); }
+  33%  { transform: translate(30px, -40px) scale(1.08); }
+  66%  { transform: translate(-20px, 20px) scale(0.95); }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(24px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+  from { opacity: 0; transform: translateY(20px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes modalIn {
-  from { opacity: 0; transform: scale(0.92) translateY(12px); }
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes overlayIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; backdrop-filter: blur(0px); }
+  to   { opacity: 1; backdrop-filter: blur(8px); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%      { opacity: 0.8; transform: scale(1.05); }
 }
 
 @keyframes shimmer {
   0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0;  }
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50%      { transform: translateY(-8px); }
+  100% { background-position: 200% 0; }
 }
 
 @layer utilities {
   .animate-blob {
-    animation: blob 7s infinite;
+    animation: blob 8s infinite ease-in-out;
   }
   .animation-delay-2000 {
     animation-delay: 2s;
@@ -77,7 +78,7 @@ body {
     animation-delay: 4s;
   }
   .animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out both;
+    animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
   .animate-modal-in {
     animation: modalIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -85,16 +86,46 @@ body {
   .animate-overlay-in {
     animation: overlayIn 0.25s ease-out both;
   }
+  .animate-pulse-glow {
+    animation: pulseGlow 3s infinite ease-in-out;
+  }
   .animate-shimmer {
     background-size: 200% 100%;
     animation: shimmer 2s linear infinite;
   }
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
+
+  /* Glassmorphism & High-Tech Utilities */
+  .glass-card {
+    @apply bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl border border-slate-200/60 dark:border-slate-800/60 shadow-xl;
+  }
+
+  .glass-pill {
+    @apply bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border border-slate-200/80 dark:border-slate-700/80 shadow-sm;
+  }
+
+  .tech-border {
+    @apply border border-indigo-500/20 dark:border-indigo-400/20 shadow-[0_0_15px_rgba(99,102,241,0.08)];
+  }
+
+  .glow-blue {
+    box-shadow: 0 0 25px -5px rgba(59, 130, 246, 0.4);
+  }
+
+  .glow-indigo {
+    box-shadow: 0 0 25px -5px rgba(99, 102, 241, 0.4);
+  }
+
+  /* Hide scrollbars for pill tabs horizontal scrolling */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
   }
 }
 
-/* Staggered card entrance — use style={{ animationDelay: `${i*0.08}s` }} */
 .card-enter {
-  animation: fadeInUp 0.5s ease-out both;
+  animation: fadeInUp 0.45s ease-out both;
 }
+

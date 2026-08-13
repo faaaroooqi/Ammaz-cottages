@@ -83,190 +83,169 @@ function Profile() {
 
   if (!user) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-950 font-sans pb-20">
-      {/* Header / Hero */}
-      <div className="relative bg-gradient-to-br from-indigo-900 via-blue-800 to-blue-900 pt-32 pb-48 px-6 overflow-hidden">
-        {/* Decorative background */}
-        <div className="absolute inset-0 opacity-20">
-          <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
-          <div className="absolute top-0 -right-4 w-72 h-72 bg-indigo-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-24">
+      {/* Header Banner */}
+      <div className="relative bg-gradient-to-br from-slate-950 via-indigo-950 to-slate-900 text-white pt-16 pb-36 px-6 overflow-hidden">
+        <div className="absolute inset-0 opacity-20 pointer-events-none">
+          <div className="absolute -top-24 -left-24 w-96 h-96 bg-blue-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob"></div>
+          <div className="absolute top-0 -right-4 w-72 h-72 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-2000"></div>
+          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-blob animation-delay-4000"></div>
         </div>
 
-        <div className="relative max-w-6xl mx-auto z-10 flex flex-col md:flex-row items-center gap-8">
+        <div className="relative max-w-5xl mx-auto z-10 flex flex-col md:flex-row items-center gap-8">
+          
+          {/* Avatar Dropzone */}
           <div className="relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-3xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-            <img
-              src={user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || user.name || "User")}&size=160&background=4f46e5&color=fff&bold=true&font-size=0.4`}
-              alt="Profile"
-              className="relative w-32 h-32 md:w-40 md:h-40 rounded-3xl shadow-2xl border-4 border-white/10 object-cover"
-            />
-            
-            {/* Hover Overlay for Upload/Delete */}
-            <div className="absolute inset-0 bg-black/60 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 z-10">
-              <label className="cursor-pointer text-white font-bold text-xs bg-white/20 hover:bg-white/30 transition px-3 py-2 rounded-xl backdrop-blur-sm flex items-center gap-2 shadow-sm">
-                <span>📷 Upload</span>
-                <input type="file" className="hidden" accept="image/jpeg, image/png, image/webp" onChange={handleUploadPic} disabled={loading} />
-              </label>
-              {user.profilePic && (
-                <button 
-                  onClick={handleDeletePic}
-                  disabled={loading}
-                  className="text-white font-bold text-xs bg-red-500/80 hover:bg-red-500 transition px-3 py-2 rounded-xl backdrop-blur-sm flex items-center gap-2 shadow-sm"
-                >
-                  <span>🗑️ Remove</span>
-                </button>
-              )}
+            <div className="w-32 h-32 md:w-36 md:h-36 rounded-3xl overflow-hidden shadow-2xl border-4 border-white/20 relative bg-slate-800">
+              <img
+                src={user.profilePic || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.username || user.name || "User")}&size=160&background=4f46e5&color=fff&bold=true`}
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-slate-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2">
+                <label className="cursor-pointer text-white text-[10px] font-black uppercase tracking-wider bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-xl backdrop-blur-md">
+                  <span>📷 Photo</span>
+                  <input type="file" className="hidden" accept="image/jpeg, image/png, image/webp" onChange={handleUploadPic} disabled={loading} />
+                </label>
+                {user.profilePic && (
+                  <button 
+                    onClick={handleDeletePic}
+                    disabled={loading}
+                    className="text-white text-[10px] font-black uppercase tracking-wider bg-rose-600/80 hover:bg-rose-600 px-3 py-1.5 rounded-xl backdrop-blur-md"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
             </div>
-
-            <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-indigo-900 z-20 pointer-events-none"></div>
+            <div className="absolute -bottom-1 -right-1 bg-emerald-500 w-5 h-5 rounded-full border-4 border-slate-900 z-10" title="Account Verified"></div>
           </div>
           
-          <div className="text-center md:text-left">
-            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 px-4 py-1.5 rounded-full mb-4">
-              <span className="text-blue-100 text-xs font-bold uppercase tracking-widest">{user.role || "Customer"} Account</span>
+          {/* User Headline & Badges */}
+          <div className="text-center md:text-left space-y-2">
+            <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1 rounded-full">
+              <span className="text-indigo-200 text-xs font-black uppercase tracking-wider">Verified {user.role || "Guest"} Account</span>
             </div>
-            <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-2 tracking-tight drop-shadow-md">
-              {user.username || user.name || "User"}
+            <h1 className="text-3xl sm:text-4xl font-black text-white tracking-tight drop-shadow-md">
+              {user.username || user.name || "Guest Account"}
             </h1>
-            <p className="text-blue-100/80 text-lg font-medium drop-shadow-sm">
+            <p className="text-indigo-200/80 text-sm font-medium">
               {user.email}
             </p>
           </div>
+
         </div>
       </div>
 
-      {/* Main Content Card */}
-      <div className="max-w-6xl mx-auto px-6 -mt-24 relative z-20">
-        <div className="bg-white dark:bg-gray-900 rounded-[2.5rem] shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden flex flex-col lg:flex-row">
+      {/* Main Settings Box */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 -mt-16 relative z-20">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl shadow-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden flex flex-col md:flex-row">
           
-          {/* Sidebar / Tabs */}
-          <div className="lg:w-72 bg-gray-50/50 dark:bg-gray-800/30 border-r border-gray-100 dark:border-gray-800 p-8">
-            <nav className="space-y-2">
-              <button className="w-full flex items-center gap-3 px-4 py-3 bg-white dark:bg-gray-800 text-blue-600 dark:text-blue-400 font-bold rounded-2xl shadow-sm border border-gray-100 dark:border-gray-700 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                </svg>
-                Personal Info
-              </button>
-              <button className="w-full flex items-center gap-3 px-4 py-3 text-gray-500 dark:text-gray-400 font-bold rounded-2xl hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-all">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                </svg>
-                Security
-              </button>
-            </nav>
+          {/* Left Panel - Identity Badges */}
+          <div className="md:w-72 bg-slate-50/60 dark:bg-slate-800/40 border-r border-slate-100 dark:border-slate-800 p-6 sm:p-8 space-y-6">
+            <div>
+              <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-3">Identity Badges</h3>
+              <div className="space-y-2.5">
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-950/50 px-3.5 py-2 rounded-2xl border border-emerald-200/60 dark:border-emerald-800/60">
+                  <span>✓</span>
+                  <span>Email Verified</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs font-bold text-indigo-700 dark:text-indigo-300 bg-indigo-50 dark:bg-indigo-950/50 px-3.5 py-2 rounded-2xl border border-indigo-200/60 dark:border-indigo-800/60">
+                  <span>🛡️</span>
+                  <span>SSL Security Active</span>
+                </div>
+              </div>
+            </div>
 
-            <div className="mt-12 p-6 bg-indigo-50 dark:bg-indigo-900/20 rounded-3xl border border-indigo-100/50 dark:border-indigo-800/30">
-              <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest mb-2">Member Since</p>
-              <p className="text-sm font-extrabold text-gray-800 dark:text-gray-200">
-                {user.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : 'April 2024'}
-              </p>
+            <div className="pt-4 border-t border-slate-200/60 dark:border-slate-700/60">
+              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block mb-1">Member Since</span>
+              <span className="text-xs font-black text-slate-800 dark:text-slate-200">
+                {user.createdAt ? new Date(user.createdAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' }) : 'Resort Guest'}
+              </span>
             </div>
           </div>
 
-          {/* Form Content */}
-          <div className="flex-1 p-8 md:p-12">
-            <div className="mb-10">
-              <h2 className="text-2xl font-extrabold text-gray-900 dark:text-white tracking-tight">Account Settings</h2>
-              <p className="text-gray-500 dark:text-gray-400 mt-1 font-medium">Update your profile information and account security</p>
+          {/* Right Panel - Settings Form */}
+          <div className="flex-1 p-6 sm:p-10">
+            <div className="mb-8 pb-4 border-b border-slate-100 dark:border-slate-800">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Account & Personal Settings</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-medium">Update your guest name, contact phone, and security password.</p>
             </div>
 
-            <div className="space-y-10">
-              {/* Group 1: General */}
-              <section>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Full Name</label>
-                    <input
-                      type="text"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      className="w-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white p-4 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 transition-all outline-none font-semibold shadow-sm"
-                      placeholder="Your full name"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">Phone Number</label>
-                    <input
-                      type="text"
-                      value={phone}
-                      onChange={(e) => setPhone(e.target.value)}
-                      className="w-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white p-4 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 transition-all outline-none font-semibold shadow-sm"
-                      placeholder="+92 300 1234567"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-500 dark:text-gray-400 ml-1">Email (Primary)</label>
-                    <div className="relative">
-                      <input
-                        type="email"
-                        value={user.email}
-                        disabled
-                        className="w-full border border-gray-100 dark:border-gray-800 bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-500 p-4 rounded-2xl font-semibold cursor-not-allowed opacity-80"
-                      />
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] font-bold text-green-600 bg-green-50 dark:bg-green-900/30 px-2 py-1 rounded-full uppercase tracking-tighter">Verified</span>
-                    </div>
-                  </div>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Full Name
+                  </label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm font-semibold transition"
+                    placeholder="Your full name"
+                  />
                 </div>
-              </section>
 
-              <hr className="border-gray-100 dark:border-gray-800" />
-
-              {/* Group 2: Security */}
-              <section>
-                <div className="max-w-md space-y-6">
-                  <div>
-                    <h3 className="text-lg font-bold text-gray-800 dark:text-white mb-1">Security Update</h3>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-6 font-medium">Leave password blank if you don't want to change it</p>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-bold text-gray-700 dark:text-gray-300 ml-1">New Password</label>
-                    <input
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="w-full border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 text-gray-900 dark:text-white p-4 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white dark:focus:bg-gray-800 transition-all outline-none font-semibold shadow-sm"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-700 dark:text-slate-300 mb-1.5 uppercase tracking-wider">
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm font-semibold transition"
+                    placeholder="+92 300 1234567"
+                  />
                 </div>
-              </section>
+              </div>
 
-              {/* Actions */}
-              <div className="pt-8 flex items-center justify-between">
-                <p className="text-xs text-gray-400 dark:text-gray-500 max-w-xs font-medium">
-                  Last updated {new Date().toLocaleDateString()}
-                </p>
+              <div>
+                <label className="block text-xs font-black text-slate-400 uppercase tracking-wider mb-1.5">
+                  Email Address (Primary Account Key)
+                </label>
+                <input
+                  type="email"
+                  value={user.email}
+                  disabled
+                  className="w-full border border-slate-100 dark:border-slate-800 bg-slate-100 dark:bg-slate-900 text-slate-400 dark:text-slate-500 p-3.5 rounded-2xl font-semibold text-sm cursor-not-allowed opacity-80"
+                />
+              </div>
+
+              <div className="pt-4 border-t border-slate-100 dark:border-slate-800">
+                <h3 className="text-sm font-black text-slate-900 dark:text-white mb-1">Security & Password</h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mb-4 font-medium">Leave blank if you do not want to alter your password.</p>
+                
+                <input
+                  type="password"
+                  placeholder="New password (optional)"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full sm:w-1/2 border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white p-3.5 rounded-2xl focus:ring-2 focus:ring-indigo-500 focus:outline-none text-sm font-semibold transition"
+                />
+              </div>
+
+              <div className="pt-6 flex justify-end">
                 <button
                   onClick={handleUpdateProfile}
                   disabled={loading}
-                  className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold px-10 py-4 rounded-2xl shadow-xl hover:shadow-2xl hover:from-blue-700 hover:to-indigo-700 disabled:opacity-70 disabled:cursor-not-allowed transition-all transform hover:-translate-y-1 active:scale-[0.98] flex items-center gap-3"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-black px-8 py-3.5 rounded-2xl shadow-lg shadow-indigo-500/20 hover:shadow-indigo-500/30 transition-all transform active:scale-95 text-xs uppercase tracking-wider disabled:opacity-50"
                 >
-                  {loading ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
-                      Processing...
-                    </>
-                  ) : (
-                    <>
-                      Save Changes
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                      </svg>
-                    </>
-                  )}
+                  {loading ? "Saving Changes..." : "Save Profile Updates"}
                 </button>
               </div>
+
             </div>
           </div>
+
         </div>
       </div>
     </div>
@@ -274,3 +253,4 @@ function Profile() {
 }
 
 export default Profile;
+

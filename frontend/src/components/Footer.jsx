@@ -1,115 +1,134 @@
-import { useEffect, useState } from "react";
-import API from "../utils/api";
+import { Link } from "react-router-dom";
 
 function Footer() {
-  const [phone, setPhone] = useState(null);
-  const [email, setEmail] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    API.get("/auth/contact")
-      .then((res) => {
-        setPhone(res.data.phone);
-        setEmail(res.data.email);
-      })
-      .catch(() => {
-        setPhone(null);
-        setEmail(null);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  const currentYear = new Date().getFullYear();
-
   return (
-    <footer className="relative bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="absolute -top-10 left-1/4 w-72 h-72 bg-indigo-600/10 rounded-full blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-10 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl pointer-events-none" />
-
-      {/* Top divider glow */}
-      <div className="h-px bg-gradient-to-r from-transparent via-indigo-500/50 to-transparent" />
-
-      <div className="relative max-w-5xl mx-auto px-6 py-10">
-        {/* Main info row */}
-        <div className="grid sm:grid-cols-2 gap-6 mb-8">
-
-          {/* Refund Policy Card */}
-          <div className="group flex gap-4 bg-white/5 hover:bg-white/8 border border-white/10 hover:border-indigo-400/40 rounded-2xl p-5 transition-all duration-300">
-            <div className="shrink-0 w-11 h-11 rounded-xl bg-amber-500/15 border border-amber-400/30 flex items-center justify-center text-xl shadow-inner">
-              📋
-            </div>
+    <footer className="bg-slate-950 text-slate-400 font-sans border-t border-slate-800/80">
+      
+      {/* Top Banner Feature Bar */}
+      <div className="border-b border-slate-800/60 bg-slate-900/40 py-8 px-6">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-6 text-center md:text-left">
+          <div className="flex items-center justify-center md:justify-start gap-3">
+            <span className="text-2xl">🔒</span>
             <div>
-              <h4 className="text-sm font-bold text-amber-300 uppercase tracking-widest mb-1.5">
-                Refund Policy
-              </h4>
-              <p className="text-gray-300 text-sm leading-relaxed">
-                Only <span className="font-bold text-white">50% of the booking amount</span> will
-                be refunded if the booking was confirmed by admin and subsequently cancelled by the
-                customer.
-              </p>
+              <h4 className="text-xs font-black text-white uppercase tracking-wider">256-Bit SSL Encryption</h4>
+              <p className="text-[11px] text-slate-500 font-medium">Safe & secure online checkout</p>
+            </div>
+          </div>
+          
+          <div className="flex items-center justify-center md:justify-start gap-3">
+            <span className="text-2xl">⚡</span>
+            <div>
+              <h4 className="text-xs font-black text-white uppercase tracking-wider">Instant Confirmation</h4>
+              <p className="text-[11px] text-slate-500 font-medium">Real-time room availability</p>
             </div>
           </div>
 
-          {/* Support / Contact Card */}
-          <div className="group flex gap-4 bg-white/5 hover:bg-white/8 border border-white/10 hover:border-indigo-400/40 rounded-2xl p-5 transition-all duration-300">
-            <div className="shrink-0 w-11 h-11 rounded-xl bg-indigo-500/15 border border-indigo-400/30 flex items-center justify-center text-xl shadow-inner">
-              📞
-            </div>
+          <div className="flex items-center justify-center md:justify-start gap-3">
+            <span className="text-2xl">🛡️</span>
             <div>
-              <h4 className="text-sm font-bold text-indigo-300 uppercase tracking-widest mb-1.5">
-                Customer Support
-              </h4>
-              {loading ? (
-                <div className="h-4 w-32 bg-white/10 rounded animate-pulse mt-1" />
-              ) : (phone || email) ? (
-                <div className="text-gray-300 text-sm leading-relaxed space-y-1">
-                  {phone && (
-                    <p>
-                      For queries contact us at:{" "}
-                      <a
-                        href={`tel:${phone.replace(/\s/g, "")}`}
-                        className="font-bold text-white hover:text-indigo-300 transition-colors underline underline-offset-2 decoration-indigo-400/50 hover:decoration-indigo-300"
-                      >
-                        {phone}
-                      </a>
-                    </p>
-                  )}
-                  {email && (
-                    <p>
-                      Or email us at:{" "}
-                      <a
-                        href={`mailto:${email}`}
-                        className="font-bold text-white hover:text-indigo-300 transition-colors underline underline-offset-2 decoration-indigo-400/50 hover:decoration-indigo-300"
-                      >
-                        {email}
-                      </a>
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <p className="text-gray-400 text-sm italic">
-                  Contact information not available.
-                </p>
-              )}
+              <h4 className="text-xs font-black text-white uppercase tracking-wider">Verified Guest Guarantee</h4>
+              <p className="text-[11px] text-slate-500 font-medium">Transparent booking policies</p>
             </div>
           </div>
-        </div>
 
-        {/* Bottom strip */}
-        <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-gray-500">
-          <span>
-            © {currentYear}{" "}
-            <span className="text-gray-400 font-semibold">Guest House</span>. All rights reserved.
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-            Service online
-          </span>
+          <div className="flex items-center justify-center md:justify-start gap-3">
+            <span className="text-2xl">📞</span>
+            <div>
+              <h4 className="text-xs font-black text-white uppercase tracking-wider">24/7 Desk Support</h4>
+              <p className="text-[11px] text-slate-500 font-medium">+92 300 1234567</p>
+            </div>
+          </div>
         </div>
       </div>
+
+      {/* Main Multi-Column Links Section */}
+      <div className="max-w-7xl mx-auto py-12 px-6 grid grid-cols-1 md:grid-cols-4 gap-8">
+        
+        {/* Col 1: Brand Info */}
+        <div className="space-y-4">
+          <div className="flex items-center gap-2">
+            <span className="w-8 h-8 rounded-xl bg-indigo-600 flex items-center justify-center text-white font-black text-sm shadow-md">
+              A
+            </span>
+            <span className="text-lg font-black tracking-tight text-white">Ammaz Cottages</span>
+          </div>
+          <p className="text-xs text-slate-500 leading-relaxed font-medium">
+            Premier resort & guest house booking platform. Offering mountain view luxury suites, deluxe family cottages, and high-speed Wi-Fi stays.
+          </p>
+          <div className="flex items-center gap-2 pt-2">
+            <span className="bg-indigo-950/60 text-indigo-400 border border-indigo-800/60 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider">
+              ⭐ 4.9 Superhost Rated
+            </span>
+          </div>
+        </div>
+
+        {/* Col 2: Navigation */}
+        <div className="space-y-3">
+          <h4 className="text-xs font-black uppercase tracking-widest text-slate-200">Navigation</h4>
+          <ul className="space-y-2 text-xs font-bold">
+            <li>
+              <Link to="/" className="hover:text-indigo-400 transition-colors">Explore All Stays</Link>
+            </li>
+            <li>
+              <Link to="/my-bookings" className="hover:text-indigo-400 transition-colors">My Reservations & Trips</Link>
+            </li>
+            <li>
+              <Link to="/profile" className="hover:text-indigo-400 transition-colors">Guest Profile Settings</Link>
+            </li>
+          </ul>
+        </div>
+
+        {/* Col 3: Policies & Trust */}
+        <div className="space-y-3">
+          <h4 className="text-xs font-black uppercase tracking-widest text-slate-200">Policies & Terms</h4>
+          <ul className="space-y-2 text-xs font-medium text-slate-400">
+            <li className="flex items-center gap-1.5">
+              <span>📜</span> 50% Standard Cancellation Refund Policy
+            </li>
+            <li className="flex items-center gap-1.5">
+              <span>🆔</span> Mandatory CNIC / Passport Identification
+            </li>
+            <li className="flex items-center gap-1.5">
+              <span>💳</span> Direct Bank Transfer & JazzCash Support
+            </li>
+          </ul>
+        </div>
+
+        {/* Col 4: Customer Support Desk */}
+        <div className="space-y-3">
+          <h4 className="text-xs font-black uppercase tracking-widest text-slate-200">Resort Desk</h4>
+          <div className="space-y-2 text-xs font-medium text-slate-400">
+            <p className="flex items-center gap-2">
+              <span className="text-indigo-400">📍</span> Main Resort Road, Mountain Valley
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-indigo-400">✉️</span> support@ammazcottages.com
+            </p>
+            <p className="flex items-center gap-2">
+              <span className="text-indigo-400">🕒</span> Check-in: 02:00 PM | Check-out: 12:00 PM
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      {/* Bottom Copyright */}
+      <div className="border-t border-slate-900 bg-slate-950 py-6 px-6 text-center text-xs text-slate-600 font-bold">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <p>© {new Date().getFullYear()} Ammaz Cottages. All rights reserved.</p>
+          <div className="flex gap-4 text-[11px] text-slate-500 font-semibold">
+            <span>Privacy Policy</span>
+            <span>•</span>
+            <span>Terms of Service</span>
+            <span>•</span>
+            <span>Guest Safety</span>
+          </div>
+        </div>
+      </div>
+
     </footer>
   );
 }
 
 export default Footer;
+

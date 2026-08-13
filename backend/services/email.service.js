@@ -11,7 +11,7 @@ const sendAndLogMail = async ({ to, subject, html }) => {
     } catch (err) {
       console.error('Failed to create email log:', err.message);
     }
-    return;
+    return { success: true };
   }
 
   if (!transporter) {
@@ -21,36 +21,75 @@ const sendAndLogMail = async ({ to, subject, html }) => {
     } catch (err) {
       console.error('Failed to create email log:', err.message);
     }
-    return;
+    return { success: false, error: 'Transporter not ready' };
   }
 
+  // Automatic retry logic (up to 2 attempts) for connection timeouts
+  let attempts = 0;
+  const maxAttempts = 2;
+  let lastError = null;
+
+  while (attempts < maxAttempts) {
+    attempts++;
+    try {
+      const info = await transporter.sendMail({
+        from: mailConfig.from,
+        to,
+        subject,
+        html
+      });
+
+      try {
+        await EmailLog.create({ to, subject, html, status: 'success' });
+      } catch (err) {
+        console.error('Failed to log email:', err.message);
+      }
+
+      if (mailConfig.isEthereal && mailConfig.isEthereal()) {
+        const nodemailer = require('nodemailer');
+        console.log(`📧 Ethereal Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+      }
+
+      return { success: true, info };
+    } catch (error) {
+      lastError = error;
+      console.error(`[EMAIL] Attempt ${attempts}/${maxAttempts} failed to send to ${to}:`, error.message);
+      if (attempts < maxAttempts) {
+        // Wait 1.5 seconds before retrying
+        await new Promise((r) => setTimeout(r, 1500));
+      }
+    }
+  }
+
+  // Log as failed if all retry attempts failed
   try {
-    const info = await transporter.sendMail({
-      from: mailConfig.from,
-      to,
-      subject,
-      html
-    });
-
-    try {
-      await EmailLog.create({ to, subject, html, status: 'success' });
-    } catch (err) {
-      console.error('Failed to log email:', err.message);
-    }
-
-    if (mailConfig.isEthereal && mailConfig.isEthereal()) {
-      const nodemailer = require('nodemailer');
-      console.log(`📧 Ethereal Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-    }
-  } catch (error) {
-    console.error(`[EMAIL] Failed to send to ${to}:`, error.message);
-    try {
-      await EmailLog.create({ to, subject, html, status: 'failed', errorMessage: error.message });
-    } catch (err) {
-      console.error('Failed to log email error:', err.message);
-    }
+    await EmailLog.create({ to, subject, html, status: 'failed', errorMessage: lastError?.message || 'Connection timeout or SMTP error' });
+  } catch (err) {
+    console.error('Failed to log email error:', err.message);
   }
+
+  return { success: false, error: lastError?.message || 'Connection timeout' };
 };
+
+/**
+ * Resend a previously logged email by its EmailLog ID.
+ */
+exports.resendEmail = async (emailLogId) => {
+  const EmailLog = require('../models/EmailLog');
+  const emailLog = await EmailLog.findById(emailLogId);
+  if (!emailLog) {
+    throw new Error('Email log not found');
+  }
+
+  const result = await sendAndLogMail({
+    to: emailLog.to,
+    subject: emailLog.subject,
+    html: emailLog.html
+  });
+
+  return result;
+};
+
 
 /**
  * Send booking confirmation email to the customer.

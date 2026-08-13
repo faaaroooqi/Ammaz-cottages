@@ -195,4 +195,11 @@ router.get(
   adminController.getEmailLogById
 );
 
+router.post(
+  '/emails/:id/resend',
+  role('owner', 'staff'),
+  adminController.resendEmail
+);
+
 module.exports = router;
+

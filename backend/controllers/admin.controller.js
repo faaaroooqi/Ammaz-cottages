@@ -535,3 +535,20 @@ exports.getEmailLogById = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+
+/**
+ * Resend a logged email.
+ */
+exports.resendEmail = async (req, res) => {
+  try {
+    const emailService = require('../services/email.service');
+    const result = await emailService.resendEmail(req.params.id);
+    if (result.success) {
+      res.status(200).json({ message: 'Email resent successfully', result });
+    } else {
+      res.status(500).json({ message: `Resend failed: ${result.error}`, result });
+    }
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

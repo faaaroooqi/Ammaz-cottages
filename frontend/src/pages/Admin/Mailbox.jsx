@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { getEmailLogs } from "../../services/admin.service";
-import { showError } from "../../utils/toast";
+import { getEmailLogs, resendEmailLog } from "../../services/admin.service";
+import { showError, showSuccess } from "../../utils/toast";
 
 function Mailbox() {
   const [logs, setLogs] = useState([]);
@@ -8,6 +8,7 @@ function Mailbox() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedLog, setSelectedLog] = useState(null);
+  const [resending, setResending] = useState(false);
 
   useEffect(() => {
     fetchLogs();
@@ -18,13 +19,12 @@ function Mailbox() {
     try {
       const params = {};
       if (search) params.search = search;
-      // Note: We can filter on client side or pass query params. Client-side is faster for immediate interactions.
       const res = await getEmailLogs(params);
-      setLogs(res.data.emailLogs || []);
+      const emailLogs = res.data.emailLogs || [];
+      setLogs(emailLogs);
       
-      // Auto-select first email if exists
-      if (res.data.emailLogs && res.data.emailLogs.length > 0) {
-        setSelectedLog(res.data.emailLogs[0]);
+      if (emailLogs.length > 0) {
+        setSelectedLog((prev) => emailLogs.find(l => l._id === prev?._id) || emailLogs[0]);
       } else {
         setSelectedLog(null);
       }
@@ -35,6 +35,21 @@ function Mailbox() {
       setLoading(false);
     }
   };
+
+  const handleResend = async () => {
+    if (!selectedLog) return;
+    setResending(true);
+    try {
+      await resendEmailLog(selectedLog._id);
+      showSuccess("Email resent successfully!");
+      fetchLogs();
+    } catch (err) {
+      showError(err.response?.data?.message || "Failed to resend email");
+    } finally {
+      setResending(false);
+    }
+  };
+
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -153,7 +168,15 @@ function Mailbox() {
                 <h1 className="text-lg md:text-xl font-black text-gray-900 dark:text-white">
                   {selectedLog.subject}
                 </h1>
+                <button
+                  onClick={handleResend}
+                  disabled={resending}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-md flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                >
+                  {resending ? "Resending..." : "🔄 Resend Email"}
+                </button>
               </div>
+
               <div className="mt-4 flex flex-wrap gap-4 text-xs">
                 <div>
                   <span className="text-gray-400 dark:text-gray-500 font-semibold block uppercase tracking-wider text-[10px]">
