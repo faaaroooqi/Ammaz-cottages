@@ -8,6 +8,7 @@ import { showSuccess, showError, showConfirm } from "../../utils/toast";
 function BookingActionMenu({
   booking,
   onEdit,
+  onToggleConfirm,
   onViewScreenshot,
   onViewIdCards,
   onCashApprove,
@@ -69,6 +70,8 @@ function BookingActionMenu({
     };
   }, [isOpen]);
 
+  const isConfirmed = booking.status === "confirmed" || booking.status === "confirmed_half_paid";
+
   return (
     <>
       <button
@@ -103,6 +106,24 @@ function BookingActionMenu({
               className="flex items-center gap-2.5 w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 hover:text-blue-700 dark:hover:text-blue-400 transition-colors font-medium"
             >
               <span className="text-base">✏️</span> Edit Booking
+            </button>
+
+            {/* Confirm Booking Toggle */}
+            <button
+              onClick={() => { setIsOpen(false); onToggleConfirm(booking); }}
+              className="flex items-center justify-between w-full text-left px-4 py-2.5 text-sm text-gray-700 dark:text-gray-200 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 hover:text-emerald-700 dark:hover:text-emerald-400 transition-colors font-medium"
+            >
+              <div className="flex items-center gap-2.5">
+                <span className="text-base">{isConfirmed ? "✅" : "⏳"}</span>
+                <span>Confirm Booking</span>
+              </div>
+              <div
+                className={`w-8 h-4.5 flex items-center rounded-full p-0.5 transition-colors duration-200 ease-in-out ${
+                  isConfirmed ? "bg-emerald-500 justify-end" : "bg-gray-300 dark:bg-gray-600 justify-start"
+                }`}
+              >
+                <div className="w-3.5 h-3.5 bg-white rounded-full shadow-md transform transition-transform duration-200 ease-in-out"></div>
+              </div>
             </button>
 
             {/* View Screenshot */}
@@ -183,6 +204,30 @@ function ManageBookings() {
       setBookings(res.data.bookings);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const handleToggleConfirm = async (booking) => {
+    const isCurrentlyConfirmed = booking.status === "confirmed" || booking.status === "confirmed_half_paid";
+    const newStatus = isCurrentlyConfirmed ? "awaiting_payment" : "confirmed";
+    const confirmMessage = isCurrentlyConfirmed
+      ? `Are you sure you want to unconfirm Booking #${booking.bookingId}?`
+      : `Are you sure you want to confirm Booking #${booking.bookingId}?`;
+    
+    const ok = await showConfirm(confirmMessage);
+    if (!ok) return;
+
+    try {
+      await updateBooking(booking._id, { status: newStatus });
+      showSuccess(
+        isCurrentlyConfirmed
+          ? "Booking marked as unconfirmed (Awaiting Payment)!"
+          : "Booking confirmed successfully!"
+      );
+      loadBookings();
+    } catch (err) {
+      console.error("Error toggling booking confirmation", err);
+      showError(err.response?.data?.message || "Failed to update booking status");
     }
   };
 
@@ -322,6 +367,7 @@ function ManageBookings() {
                       <BookingActionMenu
                         booking={b}
                         onEdit={handleEdit}
+                        onToggleConfirm={handleToggleConfirm}
                         onViewScreenshot={(url) => setScreenshotUrl(url)}
                         onViewIdCards={(imgs) => { setIdCardImages(imgs); setActiveIdCardIndex(0); }}
                         onCashApprove={handleCashApprove}
