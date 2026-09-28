@@ -161,7 +161,7 @@ function BookingPage() {
         data.append("idCards", file);
       });
 
-      await API.post(`/bookings/${createdBooking._id}/upload-id-cards`, data, {
+      await API.post(`/bookings/${createdBooking._id}/idcards`, data, {
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data"
@@ -179,10 +179,7 @@ function BookingPage() {
     }
   };
 
-  const handleSkipIdUpload = () => {
-    setShowIdModal(false);
-    navigate(`/payment/pending?bookingId=${createdBooking._id}`);
-  };
+  // No skip — ID card upload is mandatory before proceeding to payment
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 py-10 px-4 sm:px-6 lg:px-8 font-sans">
@@ -452,8 +449,11 @@ function BookingPage() {
             </div>
             
             <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-2 tracking-tight">Upload Guest ID Photo</h3>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mb-6 font-medium leading-relaxed">
-              Please attach a photo of your CNIC or Passport for guest verification. You can also skip and present it at check-in counter.
+            <p className="text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium leading-relaxed">
+              Please attach a photo of your CNIC or Passport for guest verification.
+            </p>
+            <p className="text-xs text-rose-500 dark:text-rose-400 mb-6 font-bold">
+              ⚠️ ID verification is mandatory — you must upload before proceeding to payment.
             </p>
 
             <div className="mb-6">
@@ -473,18 +473,11 @@ function BookingPage() {
 
             <div className="flex gap-3">
               <button
-                onClick={handleSkipIdUpload}
-                disabled={uploadingId}
-                className="flex-1 py-3 px-4 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-black text-xs rounded-2xl transition"
-              >
-                Skip for now
-              </button>
-              <button
                 onClick={handleIdUpload}
-                disabled={uploadingId}
-                className="flex-1 py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xs rounded-2xl transition shadow-md disabled:opacity-50"
+                disabled={uploadingId || idFiles.length === 0}
+                className="w-full py-3 px-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-black text-xs rounded-2xl transition shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {uploadingId ? "Uploading..." : "Upload & Continue"}
+                {uploadingId ? "Uploading..." : "Upload & Continue to Payment"}
               </button>
             </div>
 
