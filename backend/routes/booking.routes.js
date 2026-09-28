@@ -6,7 +6,7 @@ const auth = require('../middlewares/auth.middleware');
 const role = require('../middlewares/role.middleware');
 const validate = require('../middlewares/validate.middleware');
 const bookingSchema = require('../validations/booking.schema');
-const { uploadScreenshot, uploadRoomImages } = require('../middlewares/multer.middleware');
+const { uploadScreenshot, uploadIdCards } = require('../middlewares/multer.middleware');
 
 // ─── Customer Routes ───────────────────────────────────────────────
 
@@ -56,7 +56,7 @@ router.post(
   '/:bookingId/idcards',
   auth,
   (req, res, next) => {
-    uploadRoomImages(req, res, (err) => {
+    uploadIdCards(req, res, (err) => {
       if (err) {
         return res.status(400).json({ message: err.message });
       }

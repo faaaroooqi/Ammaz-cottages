@@ -40,8 +40,16 @@ const uploadScreenshot = multer({
   fileFilter: imageFilter
 }).single('screenshot');
 
+// ─── ID Card Images (up to 4) ──────────────────────────────────────
+const uploadIdCards = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: imageFilter
+}).array('idCards', 4);
+
 module.exports = {
   uploadRoomImages,
   uploadSingleImage,
-  uploadScreenshot
+  uploadScreenshot,
+  uploadIdCards
 };
